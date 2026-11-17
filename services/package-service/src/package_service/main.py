@@ -30,7 +30,7 @@ def create_package(body: PackageCreate, session: SessionDep):
     except IntegrityError:
         session.rollback()
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_409_CONFLICT,
             detail="Package with this name already exists.",
         )
-    return f"{package.name} has been created successfully"
+    return package

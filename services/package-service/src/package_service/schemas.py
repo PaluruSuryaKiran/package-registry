@@ -7,13 +7,14 @@ class PackageCreate(BaseModel):
         extra="forbid"
     )
 
-    name: str = Field(..., min_length=2, max_length=100)
+    name: str = Field(
+        ..., min_length=2, max_length=100, pattern=r"^[a-z][a-z0-9-]*$"
+    )
     description: str = Field(default="", max_length=500)
 
 class PackageOut(BaseModel):
     model_config = ConfigDict(
-        str_strip_whitespace=True,
-        extra="forbid"
+        from_attributes=True
     )
 
     name: str
