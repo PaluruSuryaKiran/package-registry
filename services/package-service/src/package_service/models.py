@@ -27,3 +27,4 @@ class Release(Base):
     released_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+    package: Mapped["Package"] = relationship(back_populates="releases")
