@@ -22,6 +22,12 @@ def test_parse_valid(text, expected):
         "1.2.3.4",
         "v1.2.3",
         "1.2.x",
+        "01.2.3",
+        "1.2.3 ",
+        "1.2.3\n",
+        "\u0661.\u0662.\u0663",
+        "-1.2.3",
+        "1..3"
     ],
 )
 def test_parse_invalid(text):
