@@ -7,6 +7,9 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql+psycopg://pkg:pkg@loca
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 session_local = sessionmaker(bind=engine, expire_on_commit=False)
 
+class Base(DeclarativeBase):
+    pass
+
 def get_session():
     session = session_local()
     try:
