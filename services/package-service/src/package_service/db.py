@@ -2,7 +2,13 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql+psycopg://pkg:pkg@localhost/packages")
+load_dotenv() 
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL is not set. Copy .env.example to .env and fill it in."
+    )
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 session_local = sessionmaker(bind=engine, expire_on_commit=False)
