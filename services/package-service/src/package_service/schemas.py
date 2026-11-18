@@ -20,4 +20,6 @@ class PackageOut(BaseModel):
     name: str
     description: str
     created_at: datetime
+    latest_version: str | None = None
+    
 

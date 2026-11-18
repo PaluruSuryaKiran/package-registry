@@ -43,5 +43,5 @@ def session(engine):
 
 
 @pytest.fixture
-def client():
+def client(engine):
     return TestClient(app)
