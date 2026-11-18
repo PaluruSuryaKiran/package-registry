@@ -1,31 +1,27 @@
 import os
 from dotenv import load_dotenv
-import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-
 
 load_dotenv()
 
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
-
 if not TEST_DATABASE_URL:
-    raise RuntimeError(
-        "TEST_DATABASE_URL is not set. Copy .env.example to .env and fill it in."
-    )
-
+    raise RuntimeError("TEST_DATABASE_URL is not set. Copy .env.example to .env and fill it in.")
 if TEST_DATABASE_URL == os.environ.get("DATABASE_URL"):
-    raise RuntimeError(
-        "TEST_DATABASE_URL must differ from DATABASE_URL: the tests drop all tables."
-    )
+    raise RuntimeError("TEST_DATABASE_URL must differ from DATABASE_URL: the tests drop all tables.")
 
-# Point the app at the test database before anything imports package_service.db.
+# Must happen before anything imports package_service, because db.py reads
+# DATABASE_URL at import time. Keep the imports below this line.
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
-from package_service import models  # noqa: F401  (registers the tables on Base)
-from package_service.db import Base
-from fastapi.testclient import TestClient
-from package_service.main import app
+import pytest  
+from fastapi.testclient import TestClient  
+from sqlalchemy import create_engine  
+from sqlalchemy.orm import Session  
+from package_service.db import Base  
+from package_service.main import app  
+from package_service.models import Package, Release  
+from package_service.versions import parse_version  
+
 
 @pytest.fixture
 def engine():
@@ -45,3 +41,21 @@ def session(engine):
 @pytest.fixture
 def client(engine):
     return TestClient(app)
+
+
+@pytest.fixture
+def add_package(session):
+    """Return a helper that inserts a package and its releases, bypassing the API."""
+
+    def _add(name, versions=()):
+        package = Package(name=name)
+        for text in versions:
+            v = parse_version(text)
+            package.releases.append(
+                Release(version=text, major=v.major, minor=v.minor, patch=v.patch)
+            )
+        session.add(package)
+        session.commit()
+        return package
+
+    return _add

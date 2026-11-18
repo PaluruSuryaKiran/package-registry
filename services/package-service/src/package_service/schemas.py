@@ -1,5 +1,9 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from package_service.versions import parse_version
+
+MAX_VERSION_PART = 100
+
 
 class PackageCreate(BaseModel):
     model_config = ConfigDict(
@@ -12,6 +16,7 @@ class PackageCreate(BaseModel):
     )
     description: str = Field(default="", max_length=500)
 
+
 class PackageOut(BaseModel):
     model_config = ConfigDict(
         from_attributes=True
@@ -23,3 +28,25 @@ class PackageOut(BaseModel):
     latest_version: str | None = None
     
 
+class ReleaseCreate(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid"
+        )
+
+    version: str = Field(max_length=15)
+
+    @field_validator("version")
+    @classmethod
+    def check_version(cls, value: str) -> str:
+        if max(parse_version(value)) > MAX_VERSION_PART:
+            raise ValueError(f"version parts must be at most {MAX_VERSION_PART}")
+        return value
+
+
+class ReleaseOut(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+    version: str
+    released_at: datetime
