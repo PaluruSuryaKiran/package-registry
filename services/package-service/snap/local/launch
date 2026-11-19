@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+DATABASE_URL="$(snapctl get database-url)"
+if [ -z "$DATABASE_URL" ]; then
+    echo "database-url is not set. Run: sudo snap set $SNAP_INSTANCE_NAME database-url=..." >&2
+    exit 1
+fi
+export DATABASE_URL
+
+PORT="$(snapctl get port)"
+PORT="${PORT:-8000}"
+
+exec "$SNAP/bin/uvicorn" package_service.main:app --host 0.0.0.0 --port "$PORT"

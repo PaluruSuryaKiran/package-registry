@@ -1,0 +1,31 @@
+name: release-tracker-surya
+base: core24
+version: '0.1.0'
+summary: Track package releases through a small REST API
+description: |
+  A FastAPI service that registers packages and their releases,
+  and reports each package's latest version by semantic version order.
+  Needs a PostgreSQL database. Configure it with:
+    sudo snap set release-tracker-surya database-url=postgresql+psycopg://USER:PASSWORD@HOST/DB
+grade: devel
+confinement: strict
+
+apps:
+  server:
+    command: bin/launch
+    daemon: simple
+    install-mode: disable
+    restart-condition: on-failure
+    plugs:
+      - network
+      - network-bind
+
+parts:
+  service:
+    plugin: python
+    source: .
+  launcher:
+    plugin: dump
+    source: snap/local
+    organize:
+      launch: bin/launch
